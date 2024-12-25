@@ -15,10 +15,13 @@ export const UserController = new Elysia({
 
     .get('/all', () => {
         return {
-            text: "hello wond"
+            user: [
+                { id: '1212', name: 'a' },
+                { id: '1212', name: 'b' },
+            ]
         }
     }, {
-        isSignIn: true
+
     })
     .get('/', ({ query, Auth }) => {
         const user_id = (Auth.payload as authPayload).id
@@ -31,7 +34,7 @@ export const UserController = new Elysia({
     })
     .patch('/', async ({ body, set, Auth }) => {
         try {
-            const user_id =  (Auth.payload as authPayload).id
+            const user_id = (Auth.payload as authPayload).id
             await UserService.updateProfile(body, user_id)
             set.status = "No Content"
         } catch (error) {
