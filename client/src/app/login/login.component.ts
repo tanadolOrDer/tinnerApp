@@ -7,11 +7,14 @@ import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatIconModule } from '@angular/material/icon'
 import { MatInputModule } from '@angular/material/input'
 import { MatDatepickerModule } from '@angular/material/datepicker'
+import { MatButtonModule } from '@angular/material/button'
+import { MatRadioModule } from '@angular/material/radio'
+import { MatCardModule } from '@angular/material/card'
 
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, CommonModule, FormsModule, MatInputModule, MatIconModule, MatDatepickerModule, MatFormFieldModule],
+  imports: [ReactiveFormsModule, CommonModule, FormsModule, MatInputModule, MatIconModule, MatDatepickerModule, MatFormFieldModule,MatButtonModule,MatRadioModule,MatCardModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
@@ -19,9 +22,9 @@ export class LoginComponent {
   mode: 'login' | 'register ' = 'login'
   form: FormGroup
   private readonly _correntYear = new Date().getFullYear()
-  readonly minDate =
-    readonly
-  readonly
+  readonly minDate = new Date(this._correntYear - 70 ,0,1)
+    readonly maxDate = new Date(this._correntYear - 18 ,11,31)
+  readonly startDate = new Date(this._correntYear - 18 ,0,1)
 
   errorMessages = {
     username: signal(''),
@@ -38,7 +41,7 @@ export class LoginComponent {
 
   }
   toggleMode() {
-    this.mode = this.mode == 'login' ? 'register ' : 'login'
+    this.mode = this.mode === 'login' ? 'register ' : 'login'
     this.updateForm()
   }
   updateForm() {
@@ -54,7 +57,7 @@ export class LoginComponent {
       this.form.removeValidators(PasswordMatchValidator('password', 'confirm_password'))
       this.form.removeControl('display_name')
       this.form.removeControl('date_of_birth')
-      this.form.removeControl('genderd')
+      this.form.removeControl('gender')
       this.form.removeControl('looking_for')
     }
   }
