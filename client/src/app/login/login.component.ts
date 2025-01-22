@@ -1,30 +1,38 @@
-import { Component, signal } from '@angular/core'
+import { Component, inject, signal } from '@angular/core'
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms'
-import { PasswordValidator } from '../validator/password.validator'
-import { PasswordMatchValidator } from '../validator/password.match.validator'
+
+
 import { CommonModule } from '@angular/common'
 import { MatFormFieldModule } from '@angular/material/form-field'
-import { MatIconModule } from '@angular/material/icon'
 import { MatInputModule } from '@angular/material/input'
-import { MatDatepickerModule } from '@angular/material/datepicker'
 import { MatButtonModule } from '@angular/material/button'
+import { MatDatepickerModule } from '@angular/material/datepicker'
 import { MatRadioModule } from '@angular/material/radio'
+import { provideNativeDateAdapter } from '@angular/material/core'
 import { MatCardModule } from '@angular/material/card'
-
+import { AccountService } from '../_services/account.service'
+import { Router } from '@angular/router'
+import { PasswordValidator } from '../validator/password.validator'
+import { PasswordMatchValidator } from '../validator/password.match.validator'
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, CommonModule, FormsModule, MatInputModule, MatIconModule, MatDatepickerModule, MatFormFieldModule,MatButtonModule,MatRadioModule,MatCardModule],
+  imports: [MatCardModule, MatRadioModule, ReactiveFormsModule, CommonModule, FormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatDatepickerModule],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.scss'
+  styleUrl: './login.component.scss',
+  providers: [provideNativeDateAdapter()],
 })
 export class LoginComponent {
-  mode: 'login' | 'register ' = 'login'
+  mode: 'login' | 'register' = 'login'
   form: FormGroup
-  private readonly _correntYear = new Date().getFullYear()
-  readonly minDate = new Date(this._correntYear - 70 ,0,1)
-    readonly maxDate = new Date(this._correntYear - 18 ,11,31)
-  readonly startDate = new Date(this._correntYear - 18 ,0,1)
+
+  private accountService = inject(AccountService)
+  private router = inject(Router)
+  private readonly _currentYear = new Date().getFullYear()
+  errorFormServer = ''
+  readonly minDate = new Date(this._currentYear - 70, 0, 1)
+  readonly maxDate = new Date(this._currentYear - 18, 11, 31)
+  readonly startDate = new Date(this._currentYear - 18, 0, 1)
 
   errorMessages = {
     username: signal(''),
@@ -32,23 +40,24 @@ export class LoginComponent {
     display_name: signal(''),
     confirm_password: signal(''),
   }
+
   constructor() {
     this.form = new FormGroup({
       username: new FormControl(null, [Validators.required, Validators.minLength(6), Validators.maxLength(16)]),
       password: new FormControl(null, [Validators.required, PasswordValidator(8, 16)]),
-
     })
-
   }
+
   toggleMode() {
-    this.mode = this.mode === 'login' ? 'register ' : 'login'
+    this.mode = this.mode === 'login' ? 'register' : 'login'
     this.updateForm()
   }
   updateForm() {
-    if (this.mode === 'register ') {
+    if (this.mode === 'register') {
       this.form.addControl('confirm_password', new FormControl(null, Validators.required))
       this.form.addValidators(PasswordMatchValidator('password', 'confirm_password'))
-      this.form.addControl('display_name', new FormControl(null, [Validators.required, Validators.minLength(3), Validators.maxLength(10)]))
+
+      this.form.addControl('display_name', new FormControl(null, [Validators.required, Validators.minLength(3), Validators.maxLength(8)]))
       this.form.addControl('date_of_birth', new FormControl(null, Validators.required))
       this.form.addControl('gender', new FormControl(null, Validators.required))
       this.form.addControl('looking_for', new FormControl(null, Validators.required))
@@ -61,64 +70,75 @@ export class LoginComponent {
       this.form.removeControl('looking_for')
     }
   }
-  onSubmit() {
 
+  async onSubmit() {
+    // console.log(this.form.value)
+    if (this.mode === 'login') {
+      this.errorFormServer = await this.accountService.login(this.form.value)
+    } else {//register
+      this.errorFormServer = await this.accountService.register(this.form.value)
+    }
+
+    if (this.errorFormServer === '')
+      this.router.navigate(['/'])
   }
+
   updateErrorMessage(ctrlName: string) {
     const control = this.form.controls[ctrlName]
-    if (!control)
-      return
-
+    if (!control) return
 
     switch (ctrlName) {
       case 'username':
+        // console.log('minLength: ' + control.hasError('minlength'))
+        // console.log('maxLength: ' + control.hasError('maxlength'))
         if (control.hasError('required'))
-          this.errorMessages.username.set('username not fond')
+          this.errorMessages.username.set('required')
         else if (control.hasError('minlength'))
           this.errorMessages.username.set('must be at least 6 characters long')
         else if (control.hasError('maxlength'))
           this.errorMessages.username.set('must be 16 characters or fewer')
         else
           this.errorMessages.username.set('')
+        // console.log(this.errorMessages.username())
         break
+
       case 'password':
-        if (!control.hasError('required'))
+        if (control.hasError('required'))
           this.errorMessages.password.set('required')
-        else if (control.hasError('invalidMinlength'))
-          this.errorMessages.password.set('must be at least 6 characters long')
-        else if (control.hasError('invalidMaxlength'))
+        else if (control.hasError('invalidMinLength'))
+          this.errorMessages.password.set('must be at least 8 characters long')
+        else if (control.hasError('invalidMaxLength'))
           this.errorMessages.password.set('must be 16 characters or fewer')
         else if (control.hasError('invalidLowerCase'))
-          this.errorMessages.password.set('must contain minimum of 1 LowerCase letter ')
+          this.errorMessages.password.set('must contain minimum of 1 lower-case letter')
         else if (control.hasError('invalidUpperCase'))
-          this.errorMessages.password.set('must contain minimum of 1 UpperCase')
+          this.errorMessages.password.set('must contain minimum of 1 capital letter')
         else if (control.hasError('invalidNumeric'))
-          this.errorMessages.password.set('must contain minimum of 1 Numeric')
-        else if (control.hasError('invalidSpecislChar'))
-          this.errorMessages.password.set('must contain minimum of 1 SpecislChar')
-
+          this.errorMessages.password.set('must contain minimum of 1 numeric character')
+        else if (control.hasError('invalidSpecialChar'))
+          this.errorMessages.password.set('must contain minimum of 1 special character')
+        else
+          this.errorMessages.password.set('')
         break
+
       case 'confirm_password':
-        if (!control.hasError('required'))
+        if (control.hasError('required'))
           this.errorMessages.confirm_password.set('required')
         else if (control.hasError('misMatch'))
-          this.errorMessages.confirm_password.set('do not math password')
+          this.errorMessages.confirm_password.set('do not match password')
         else
           this.errorMessages.confirm_password.set('')
         break
       case 'display_name':
-        if (!control.hasError('required'))
+        if (control.hasError('required'))
           this.errorMessages.display_name.set('required')
         else if (control.hasError('minlength'))
-          this.errorMessages.display_name.set('do not math password')
+          this.errorMessages.display_name.set('must be at least 3 characters long')
         else if (control.hasError('maxlength'))
-          this.errorMessages.display_name.set('do not math password')
+          this.errorMessages.display_name.set('must be 8 characters or fewer')
         else
           this.errorMessages.display_name.set('')
-
         break
-
-
     }
   }
 }

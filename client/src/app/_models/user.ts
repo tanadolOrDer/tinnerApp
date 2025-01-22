@@ -19,5 +19,5 @@ export interface User {
     photoOfTheDay?: string
     followers: User[] | String[]
     following: User[] | String[]
-
+    password?: string
 }
