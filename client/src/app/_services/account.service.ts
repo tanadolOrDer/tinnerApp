@@ -19,6 +19,7 @@ export class AccountService {
   constructor() {
     this.loadDataFromLocalStorage()
   }
+  //#region "login_register"
 
   logout() {
     localStorage.removeItem(this._key)
@@ -64,5 +65,22 @@ export class AccountService {
       const data = JSON.parse(jsonString)
       this.data.set(data)
     }
+  }
+  //#endregion "My Region"
+  async updateProfile(user: User): Promise<boolean> {
+    const url = environment.baseUrl + 'api/user/'
+    try {
+      const response = this._http.patch(url, user)
+      await firstValueFrom(response)
+      const currentData = this.data()
+      if (currentData) {
+        currentData.user = user
+        this.data.set(currentData)
+        this.saveDataToLocalStorage()
+      }
+    } catch (error) {
+      return false
+    }
+    return true
   }
 }
