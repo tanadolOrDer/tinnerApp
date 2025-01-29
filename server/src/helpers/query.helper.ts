@@ -1,10 +1,11 @@
 import mongoose from "mongoose"
+import { userPagination } from "../types/user.type"
 import { IUserDocument } from "../interfaces/user.interface"
-import { _userPagination } from "../types/user"
+
 
 export const QueryHelper = {
 
-    parseUserQuery: function (query: _userPagination): mongoose.FilterQuery<IUserDocument>[] {
+    parseUserQuery: function (query: userPagination): mongoose.FilterQuery<IUserDocument>[] {
         const filter: mongoose.FilterQuery<IUserDocument>[] = []
 
         if (query.username) {
@@ -27,9 +28,9 @@ export const QueryHelper = {
             $lte?: Date //$lte (Less Than or Equal)
             $gte?: Date //$gte (Greater Than or Equal)
         } = {}
-        if (query.mix_age) {
+        if (query.min_age) {
             const today = new Date()
-            const min_birth_date = new Date(today.setFullYear(today.getFullYear() - query.mix_age))
+            const min_birth_date = new Date(today.setFullYear(today.getFullYear() - query.min_age))
             age_filter.$lte = min_birth_date
         }
         if (query.max_age) {

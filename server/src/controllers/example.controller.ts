@@ -1,14 +1,15 @@
 import Elysia, { t } from "elysia"
 
-
 export const example = new Elysia()
-    .get("/", () => "Hello Elysia", {
+
+    .get("/", () => "Hello World", {
         detail: {
             tags: ["Example"],
-            summary: "get/Hello",
-            description: "Bra bra"
+            summary: "Get Hello World",
+            description: " bla bla bla"
         }
     })
+
     .post("/about", ({ body }) => {
         return {
             id: 'xxx',
@@ -17,9 +18,10 @@ export const example = new Elysia()
     }, {
         body: t.Object({
             name: t.String()
-        }), detail: {
+        }),
+        detail: {
             tags: ["Example"],
-            summary: "abput",
-            description: "Numbertwo"
+            summary: "About",
+            description: " bla bla bla"
         }
     })

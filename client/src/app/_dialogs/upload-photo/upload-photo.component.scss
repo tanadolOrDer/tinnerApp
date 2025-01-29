@@ -1,0 +1,22 @@
+input[type="file"] {
+    visibility: hidden;
+}
+
+.content-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    margin: 0%;
+}
+
+.image-preview {
+    width: 25rem;
+    margin: 0;
+}
+
+.errorMessage {
+    color: red;
+}

@@ -1,17 +1,17 @@
 import mongoose from "mongoose"
 import { IUserDocument, IUserModel } from "../interfaces/user.interface"
-import { register, } from "../types/account.type"
-import { password } from "bun"
-import { calculateAge } from "../Helpper/date.helpper"
-import { user } from "../types/user"
-import { Photo } from "./photo.models"
+
+import { calculateAge } from "../helpers/date.helper"
+
+import { Photo } from "./photo.model"
+import { user } from "../types/user.type"
+import { register } from "../types/account.type"
 
 const schema = new mongoose.Schema<IUserDocument, IUserModel>({
     username: { type: String, required: true, unique: true },
-    //username: { type: String },
     password_hash: { type: String, required: true },
     display_name: { type: String },
-    dete_of_birth: { type: Date },
+    date_of_birth: { type: Date },
     last_active: { type: Date },
     introduction: { type: String },
     interest: { type: String },
@@ -19,25 +19,25 @@ const schema = new mongoose.Schema<IUserDocument, IUserModel>({
     location: { type: String },
     gender: { type: String },
 
-    // todo: implement photo feature
     photos: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Photo' }],
-    // todo: implement like feature
+
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
 }, {
     timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
 })
+
 schema.methods.toUser = function (): user {
     let ageString = 'N/A'
     if (this.date_of_birth)
         ageString = `${calculateAge(this.date_of_birth)}`
 
 
-    // todo: implement like feature
     const userPhotos = Array.isArray(this.photos)
         ? this.photos.map(photo => (new Photo(photo)).toPhoto())
         : undefined
 
+    // todo: implement like feature
     const parseLikeUser = (user: IUserDocument[]) => {
         return user.map(u => {
             if (u.display_name)
@@ -66,34 +66,30 @@ schema.methods.toUser = function (): user {
         looking_for: this.looking_for ?? 'all',
         location: this.location,
         gender: this.gender,
-        // todo: photo feature
-        photos: userPhotos,
-        followers: followers,
-        following: following,
 
-        // todo: like feature
-        // following: following,
-        // followers: followers,
+        photos: userPhotos,
+
+        following: following,
+        followers: followers,
     }
 }
 
-
-
 schema.methods.verifyPassword = async function (password: string): Promise<boolean> {
     return await Bun.password.verify(password, this.password_hash)
-
 }
+
 schema.statics.createUser = async function (registerData: register): Promise<IUserDocument> {
     const newUser = await new this({
         display_name: registerData.display_name,
         username: registerData.username,
         password_hash: await Bun.password.hash(registerData.password),
-        deta_of_birth: registerData.dete_of_birth,
+        date_of_birth: registerData.date_of_birth,
         looking_for: registerData.looking_for,
-        gender: registerData.gender
+        gender: registerData.gender,
     })
+
     await newUser.save()
     return newUser
-
 }
+
 export const User = mongoose.model<IUserDocument, IUserModel>("User", schema)

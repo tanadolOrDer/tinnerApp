@@ -5,23 +5,24 @@ import { tlsConfig } from "./config/tls.config"
 import cors from "@elysiajs/cors"
 import { MongoDB } from "./config/database.config"
 import { jwtConfig } from "./config/jwt.config"
-import { Accountcontroller } from "./controllers/account.controller"
-import { UserController } from "./controllers/Use.controller"
+
 import staticPlugin from "@elysiajs/static"
-import { PhotoController } from "./controllers/photo.controllers"
-import { LikeController } from "./controllers/like.controllers"
-import { ErrorController } from "./controllers/errorController"
+import { LikeController } from "./controllers/like.controller"
+import { PhotoController } from "./controllers/photo.controller"
+import { UserController } from "./controllers/user.controller"
+import { AccountController } from "./controllers/account.controller"
+
 
 MongoDB.connect()
 
 const app = new Elysia()
-  .use(Accountcontroller)
+  .use(AccountController)
   .use(LikeController)
   .use(jwtConfig)
   .use(swaggerConfig)
   .use(PhotoController)
   .use(UserController)
-  .use(ErrorController)
+  .use(UserController)
   //.use(example)
   .use(cors())
   .use(staticPlugin({

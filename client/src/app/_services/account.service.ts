@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http'
 import { User } from '../_models/user'
 import { firstValueFrom } from 'rxjs'
 import { parseUserPhoto } from '../_helper/helper'
+import { Photo } from '../_models/photo'
 
 @Injectable({
   providedIn: 'root'
@@ -82,5 +83,35 @@ export class AccountService {
       return false
     }
     return true
+  }
+  //#region "Upload Photo"
+  async uploadPhoto(file: File): Promise<boolean> {
+    const url = environment.baseUrl + 'api/photo/'
+    const fromData = new FormData()
+    fromData.append('file', file)
+    try {
+      const response = this._http.post<Photo>(url, fromData)
+      const photo = await firstValueFrom(response)
+      const user = this.data()!.user
+      if (user) {
+        if (!user.photos)
+          user.photos = []
+        user.photos?.push(photo)
+        const copyData = this.data()
+        if (copyData)
+          copyData.user = user
+        this.data.set(copyData)
+        this.saveDataToLocalStorage()
+        return true
+      }
+
+    } catch (error) {
+
+    }
+    return false
+  }
+  //#endregion "My Region"
+  async setAvatar(photo_id: string) {
+    this.accountService
   }
 }

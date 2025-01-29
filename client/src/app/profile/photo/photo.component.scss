@@ -1,0 +1,21 @@
+.photo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    flex-grow: 1;
+    overflow-y: auto;
+    height: 100%;
+
+    .upload-photo {
+        position: fixed;
+        bottom: 25px;
+        right: 20px;
+        z-index: 1000;
+    }
+
+    mat-card {
+        margin: 1em;
+        width: 250px;
+    }
+}
