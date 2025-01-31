@@ -41,7 +41,7 @@ export class PhotoComponent {
 
   }
   setAvatar(photo_id: string) {
-
+    this.accountService.setAvatar
   }
-  timeago() { }
+
 }

@@ -1,1 +1,9 @@
-<p>member works!</p>
+<div class="member-container">
+    @for (Member of paginator().item; track Member.id) {
+    <p>{{Member.display_name}}</p>
+    }
+    <mat-paginator [length]="paginator().pagination.length" [pageSize]="paginator().pagination.pageSize"
+        [pageSizeOptions]="pageSize" aria-label>
+
+
+</div>

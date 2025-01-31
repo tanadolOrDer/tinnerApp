@@ -97,11 +97,7 @@ export class AccountService {
         if (!user.photos)
           user.photos = []
         user.photos?.push(photo)
-        const copyData = this.data()
-        if (copyData)
-          copyData.user = user
-        this.data.set(copyData)
-        this.saveDataToLocalStorage()
+        setUser(user)
         return true
       }
 
@@ -109,6 +105,14 @@ export class AccountService {
 
     }
     return false
+
+    function setUser(user: User) {
+      const copyData = this.data()
+      if (copyData)
+        copyData.user = user
+      this.data.set(copyData)
+      this.saveDataToLocalStorage()
+    }
   }
   //#endregion "My Region"
   async setAvatar(photo_id: string) {
